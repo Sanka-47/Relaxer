@@ -12,7 +12,7 @@ export default function SettingsPanel() {
         <select
           value={settings.theme}
           onChange={(e) => updateTheme(e.target.value as 'light' | 'dark')}
-          className="bg-white/20 rounded px-2 py-1 text-sm [&>option]:text-black [&]:text-white"
+          className="bg-white/90 text-black rounded px-2 py-1 text-sm border border-white/30"
         >
           <option value="light">Light</option>
           <option value="dark">Dark</option>
@@ -24,7 +24,7 @@ export default function SettingsPanel() {
         <select
           value={settings.duration}
           onChange={(e) => updateDuration(Number(e.target.value) as 60 | 180 | 300)}
-          className="bg-white/20 rounded px-2 py-1 text-sm [&>option]:text-black [&]:text-white"
+          className="bg-white/90 text-black rounded px-2 py-1 text-sm border border-white/30"
         >
           <option value="60">1 Minute</option>
           <option value="180">3 Minutes</option>
@@ -45,7 +45,7 @@ export default function SettingsPanel() {
           <select
             value={settings.sound}
             onChange={(e) => updateSound(e.target.value as 'none' | 'rain' | 'forest' | 'ocean')}
-            className="bg-white/20 rounded px-2 py-1 text-sm [&>option]:text-black [&]:text-white"
+            className="bg-white/90 text-black rounded px-2 py-1 text-sm border border-white/30 disabled:opacity-50"
             disabled={!settings.isSoundEnabled}
           >
             <option value="none">None</option>
