@@ -8,9 +8,9 @@ type SoundManagerProps = {
 };
 
 const soundUrls = {
-  rain: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_1fb4ef3937.mp3',
-  forest: 'https://cdn.pixabay.com/download/audio/2021/10/25/audio_f8364c8b05.mp3',
-  ocean: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d9046b0a0d.mp3'
+  rain: '/sounds/rain.mp3',
+  forest: '/sounds/forest.mp3',
+  ocean: '/sounds/ocean.mp3'
 };
 
 export default function SoundManager({ isPlaying }: SoundManagerProps) {
@@ -20,24 +20,38 @@ export default function SoundManager({ isPlaying }: SoundManagerProps) {
   useEffect(() => {
     const initializeAudio = async () => {
       if (!settings.isSoundEnabled || settings.sound === 'none') {
-        audioRef.current?.pause();
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
         return;
       }
 
       try {
         if (!audioRef.current) {
-          audioRef.current = new Audio();
-          audioRef.current.loop = true;
-          audioRef.current.volume = 0.3;
-          audioRef.current.preload = 'auto';
+          const audio = new Audio();
+          audio.loop = true;
+          audio.volume = 0.3;
+          audio.preload = 'auto';
+          audio.crossOrigin = 'anonymous';
+          audioRef.current = audio;
         }
 
-        audioRef.current.src = soundUrls[settings.sound as keyof typeof soundUrls];
-        await audioRef.current.load();
+        const soundUrl = soundUrls[settings.sound as keyof typeof soundUrls];
+        if (audioRef.current.src !== window.location.origin + soundUrl) {
+          audioRef.current.src = soundUrl;
+          await new Promise((resolve) => {
+            audioRef.current!.addEventListener('canplaythrough', resolve, { once: true });
+            audioRef.current!.load();
+          });
+        }
 
         if (isPlaying) {
-          const playPromise = audioRef.current.play();
-          await playPromise;
+          try {
+            await audioRef.current.play();
+          } catch (playError) {
+            console.error('Audio playback failed:', playError);
+          }
         } else {
           audioRef.current.pause();
         }
@@ -49,7 +63,10 @@ export default function SoundManager({ isPlaying }: SoundManagerProps) {
     initializeAudio();
 
     return () => {
-      audioRef.current?.pause();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
     };
   }, [isPlaying, settings.isSoundEnabled, settings.sound]);
 
